@@ -1,3 +1,7 @@
+/*
+    Hitender Prakash
+    contains the general methods of server class which are common for both TCP and UDP server
+*/
 #include "server.h"
 
 void Server::serveRequest(clientInfo client){
@@ -21,11 +25,15 @@ void Server::serveRequest(clientInfo client){
     //cout<<msg;
     std::string fname=split(split(split(msg,"\r\n")[0]," ")[1],"/")[1];
 
+    //since files are kept at different file path depending on their types
+    //create the full file path
+    //currently hard coding all the directory to "Files"
+    std::string absFileName= "./Files/"+fname;
     //prepare response
     std::string reply = "";
     string fileBuf="";
     ifstream resFile;
-    resFile.open(fname.c_str());
+    resFile.open(absFileName.c_str());
     if(resFile){
         reply="HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
         while(!resFile.eof()){
@@ -41,24 +49,4 @@ void Server::serveRequest(clientInfo client){
     send(nwsockfd,reply.c_str(),strlen(reply.c_str()),0);
     write(nwsockfd,fileBuf.c_str(),strlen(fileBuf.c_str())-1);
     close(nwsockfd);
-}
-
-vector<std::string> split(std::string input, std::string delimit){
-    vector<std::string> splited;
-    if (input.size()==0||delimit==""){
-        splited.push_back(input);
-        return splited;
-    }
-    while (input.size()>0){
-        int found=input.find(delimit);
-        if(found==std::string::npos){
-            splited.push_back(input);
-            return splited;
-        }
-        else{
-            splited.push_back(input.substr(0,found));
-            input=input.substr(found+delimit.size(),input.size()-1);
-        }
-    }
-    return splited;
 }

@@ -1,3 +1,7 @@
+/*
+    Hitender Prakash
+    subclass of Server for TCPServers
+*/
 #include "server.h"
 
 TCPServer::TCPServer(int port, int domain, int con_limit){
