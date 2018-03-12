@@ -34,7 +34,7 @@ void Server::serveRequest(clientInfo client){
     ifstream resFile;
     resFile.open(absFileName.c_str());
     if(resFile){
-        reply="HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
+        reply="HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nconnection: keep-alive\r\n\r\n";
         while(!resFile.eof()){
             std::string temp="";
             getline(resFile,temp);
