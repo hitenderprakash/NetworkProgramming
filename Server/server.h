@@ -62,18 +62,18 @@
     class TCPServer:public Server{
     public:
         TCPServer(int port, int domain, int con_limit);
-        int Bind();
-        int Listen();
-        void Run();
+        virtual int Bind() override;
+        virtual int Listen() override;
+        virtual void Run() override;
     };
 
     //subclass for UDP server
     class UDPServer:public Server{
     public:
         UDPServer(int port, int domain, int con_limit);
-        int Bind();
-        int Listen();
-        void Run();
+        virtual int Bind() override;
+        virtual int Listen() override;
+        virtual void Run() override;
     };
 
     //abstarct factory
@@ -87,14 +87,14 @@
     //factory for creating IPv4 family server
     class createIPv4ServerFactory:public createServerFactory{
     public:
-        Server* createTCPServer(int port, int conLimit);
-        Server* createUPDServer(int port, int conLimit);
+        virtual Server* createTCPServer(int port, int conLimit) override;
+        virtual Server* createUPDServer(int port, int conLimit) override;
     };
     //factory for creating IPv6 family server
     class createIPv6ServerFactory:public createServerFactory{
     public:
-        Server* createTCPServer(int port, int conLimit);
-        Server* createUPDServer(int port, int conLimit);
+        virtual Server* createTCPServer(int port, int conLimit) override;
+        virtual Server* createUPDServer(int port, int conLimit) override;
     };
 
 #endif

@@ -7,7 +7,6 @@
 void Server::serveRequest(clientInfo client){
     int n;
     char buff[1024];
-    cout<<"\nInside threaded func\n";
     bzero(buff,1024);
     int nwsockfd = client.socketfd;
     struct sockaddr_in cli_addr = client.addr;
@@ -15,7 +14,7 @@ void Server::serveRequest(clientInfo client){
     char ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET,&ipAddr,ip,INET_ADDRSTRLEN);
 
-    cout<<"\n======Connection from: "<<ip<<" "<<ntohs(cli_addr.sin_port)<<"=======\n";
+    cout<<"\nServing new connection from: "<<ip<<" :"<<ntohs(cli_addr.sin_port)<<"\n";
 
     n=read(nwsockfd,buff,1023);
     if(n<0){cerr<<"\nError reading from socket\n";}
