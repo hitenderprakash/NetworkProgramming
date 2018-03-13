@@ -58,8 +58,14 @@
         //keep track of active connections
         int active_connections;
         //mutex for accessing and modifying active connections
-        std::mutex mtx; 
+        std::mutex mtx;
+        //initialize common interface for a server
+        //call this function in constructor of derived classes
+        virtual void initCommonServerParam(int port, int domain, int con_limit)final;
+
     public:
+        //these functions are not required to be virtual as derived classes do not actually overide these
+        //but uin future we may want to override 
         virtual int Bind()=0;
         virtual int Listen()=0;
         virtual void Run()=0;
