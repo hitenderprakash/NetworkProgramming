@@ -14,6 +14,7 @@ TCPServer::TCPServer(int port, int domain, int con_limit){
     serv_addr.sin_port = htons(listen_port);
     listen_socketfd=socket(this->domain,type,protocol);
     connection_limit = con_limit;
+    active_connections = 0;
 }
 int TCPServer::Bind(){
     int res=-1;
@@ -44,8 +45,21 @@ void TCPServer::Run(){
         int nwsockfd;
         while((nwsockfd=accept(listen_socketfd, (struct sockaddr *)&client_addr,&clilen))>0){
             struct clientInfo client(client_addr,nwsockfd);
-            std::thread servThread(&Server::serveRequest,this,client);
-            servThread.detach();
+            //start new service thread only if number of active connections hhas not crossed the limit
+            //otherwise drop the connection
+            //this needs to be guarded by mutex
+            mtx.lock();
+            if(active_connections < connection_limit){
+                std::thread servThread(&Server::serveRequest,this,client);
+                active_connections++;
+                servThread.detach();
+            }
+            else{
+                //std::cout<<"\nConnection Limit over, can't accept new connection";
+                //std::cout<<"\nDropping connection from: ";
+                close(nwsockfd);
+            }
+            mtx.unlock();
         }
     }
     close(listen_socketfd);

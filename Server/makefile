@@ -10,7 +10,7 @@ LIBS= -lpthread
 %.o: %.cpp
 	$(CC) $(OPTS) $(INCS) -c $<
 
-server: main.o Server.o TCPServer.o UDPServer.o helperFunctions.o createServerFactory.o
+server: main.o Server.o TCPServer.o UDPServer.o helperFunctions.o createServerFactory.o ClientInfo.o
 	$(CC) $(OPTS) $(INCS) -o $@ $^  $(LIBS)
 
 run: server

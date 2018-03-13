@@ -20,6 +20,7 @@
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <thread>
+    #include <mutex>
     #include <arpa/inet.h>
     using namespace std;
 
@@ -32,10 +33,14 @@
     //service the request in a separate thread
     //pasing a single argument is easier.
     class clientInfo{
-    public:
+    private:
         struct sockaddr_in addr;
         int socketfd;
+    public:
         clientInfo(struct sockaddr_in addr_,int socketfd_):addr(addr_),socketfd(socketfd_){}
+        int getSocket();
+        std::string getIPAddress();
+        int getPort();
     };
 
     //general Server Interface. User will never instantiate this class's object
@@ -48,8 +53,12 @@
         int listen_port;
         int listen_socketfd;
         struct sockaddr_in serv_addr;
-
+        //max number of active connection allowed
         int connection_limit;
+        //keep track of active connections
+        int active_connections;
+        //mutex for accessing and modifying active connections
+        std::mutex mtx; 
     public:
         virtual int Bind()=0;
         virtual int Listen()=0;

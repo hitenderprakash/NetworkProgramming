@@ -8,13 +8,11 @@ void Server::serveRequest(clientInfo client){
     int n;
     char buff[1024];
     bzero(buff,1024);
-    int nwsockfd = client.socketfd;
-    struct sockaddr_in cli_addr = client.addr;
-    struct in_addr ipAddr = cli_addr.sin_addr;
-    char ip[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET,&ipAddr,ip,INET_ADDRSTRLEN);
+    int nwsockfd = client.getSocket();
+    std::string ClientIP = client.getIPAddress();
+    int clientPort = client.getPort();
 
-    cout<<"\nServing new connection from: "<<ip<<" :"<<ntohs(cli_addr.sin_port)<<"\n";
+    cout<<"\nServing new connection from: "<<ClientIP<<" :"<<clientPort<<"\n";
 
     n=read(nwsockfd,buff,1023);
     if(n<0){cerr<<"\nError reading from socket\n";}
@@ -47,5 +45,8 @@ void Server::serveRequest(clientInfo client){
     }
     send(nwsockfd,reply.c_str(),strlen(reply.c_str()),0);
     write(nwsockfd,fileBuf.c_str(),strlen(fileBuf.c_str())-1);
+    mtx.lock();
     close(nwsockfd);
+    active_connections--;
+    mtx.unlock();
 }
