@@ -24,19 +24,28 @@ int main(int argc, char *argv[]){
 
     char buff[1024];
     if(argc<3){
-        fprintf(stderr,"\nusage %s hostname port\n", argv[0]);
+        std::cerr<<"\nUsage: ./TCPClient <hostname> <port>";
         exit(0);
     }
 
-    port=atoi(argv[2]);
+    try{
+        port=stoi(argv[2]);
+        if(port<=0 || port > 65535){
+            throw;
+        }
+    }
+    catch(...){
+        std::cerr<<"\nError: Invalid port entered";
+        exit(0);
+    }
     sockfd=socket(AF_INET,SOCK_STREAM,0);
     if(sockfd<0){
-        fprintf(stderr,"Error: in opening socket");
+        std::cerr<<"\nError: in opening socket";
         exit(0);
     }
     server=gethostbyname(argv[1]);
     if(server==NULL){
-        fprintf(stderr,"\nNo such host");
+        std::cerr<<"\nError: No such Host exists";
         exit(0);
     }
     bzero((char*)&serv_addr,sizeof(serv_addr));
@@ -45,7 +54,7 @@ int main(int argc, char *argv[]){
     serv_addr.sin_port=htons(port);
 
     if(connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr))<0){
-        fprintf(stderr,"\nError in connection");
+        std::cerr<<"\nError in connecting to host";
         exit(0);
     }
 
@@ -68,7 +77,9 @@ int main(int argc, char *argv[]){
         fprintf(stderr,"\nError in reading from socket");
         exit(0);
     }
-    printf("\n%s",buff);
+    std::cout<<"\nResponse from server:";
+    std::cout<<buff;
+    std::cout<<"\n";
     close(sockfd);
     return 0;
 }

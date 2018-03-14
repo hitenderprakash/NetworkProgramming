@@ -8,7 +8,7 @@ Server* createIPv4ServerFactory::createTCPServer(int port, int conLimit=100){
     return new TCPServer(port, AF_INET, conLimit);
 }
 //create IPv4 UDPServer
-Server* createIPv4ServerFactory::createUPDServer(int port, int conLimit=100){
+Server* createIPv4ServerFactory::createUDPServer(int port, int conLimit=100){
     return new UDPServer(port, AF_INET, conLimit);
 }
 
@@ -17,6 +17,6 @@ Server* createIPv6ServerFactory::createTCPServer(int port, int conLimit=100){
     return new TCPServer(port, AF_INET6, conLimit);
 }
 //create IPv6 UDPServer
-Server* createIPv6ServerFactory::createUPDServer(int port, int conLimit=100){
+Server* createIPv6ServerFactory::createUDPServer(int port, int conLimit=100){
     return new UDPServer(port, AF_INET6, conLimit);
 }

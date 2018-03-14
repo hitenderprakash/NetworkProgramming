@@ -19,6 +19,7 @@
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <netinet/in.h>
+    #include <netdb.h>
     #include <thread>
     #include <mutex>
     #include <arpa/inet.h>
@@ -65,12 +66,12 @@
 
     public:
         //these functions are not required to be virtual as derived classes do not actually overide these
-        //but uin future we may want to override 
+        //but uin future we may want to override
         virtual int Bind()=0;
         virtual int Listen()=0;
         virtual void Run()=0;
         virtual ~Server(){}
-        void serveRequest(struct clientInfo client);
+        //virtual void serveRequest(struct clientInfo client)=0;
     };
 
     //subclass for TCP server
@@ -80,6 +81,7 @@
         virtual int Bind() override;
         virtual int Listen() override;
         virtual void Run() override;
+        void serveRequest(struct clientInfo client);
     };
 
     //subclass for UDP server
@@ -89,13 +91,14 @@
         virtual int Bind() override;
         virtual int Listen() override;
         virtual void Run() override;
+        //virtual void serveRequest(struct clientInfo client) override;
     };
 
     //abstarct factory
     class createServerFactory{
     public:
         virtual Server* createTCPServer(int port, int conLimit)=0;
-        virtual Server* createUPDServer(int port, int conLimit)=0;
+        virtual Server* createUDPServer(int port, int conLimit)=0;
         virtual ~createServerFactory(){}
     };
 
@@ -103,13 +106,13 @@
     class createIPv4ServerFactory:public createServerFactory{
     public:
         virtual Server* createTCPServer(int port, int conLimit) override;
-        virtual Server* createUPDServer(int port, int conLimit) override;
+        virtual Server* createUDPServer(int port, int conLimit) override;
     };
     //factory for creating IPv6 family server
     class createIPv6ServerFactory:public createServerFactory{
     public:
         virtual Server* createTCPServer(int port, int conLimit) override;
-        virtual Server* createUPDServer(int port, int conLimit) override;
+        virtual Server* createUDPServer(int port, int conLimit) override;
     };
 
 #endif

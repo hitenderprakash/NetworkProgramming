@@ -13,10 +13,11 @@ int clientInfo::getSocket(){
 
 //get printable IP Address of client
 std::string clientInfo::getIPAddress(){
-    struct in_addr ipAddr = addr.sin_addr;
+    /*struct in_addr ipAddr = addr.sin_addr;
     char ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET,&ipAddr,ip,INET_ADDRSTRLEN);
-    return std::string(ip);
+    return std::string(ip);*/
+    return (std::string(inet_ntoa(addr.sin_addr)));
 }
 
 //get the port of the client
