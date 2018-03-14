@@ -33,12 +33,17 @@
     //A small class, we need to pass the clientInfo for serveRequest method to
     //service the request in a separate thread
     //pasing a single argument is easier.
-    class clientInfo{
-    private:
-        struct sockaddr_in addr;
-        int socketfd;
+    class ConnectionInfo{
     public:
-        clientInfo(struct sockaddr_in addr_,int socketfd_):addr(addr_),socketfd(socketfd_){}
+        int domain;
+        int type;
+        struct sockaddr_in ClientAddr;
+        int socketfd ;
+        int numBytes;
+        int buffSize=1024;
+        char buff[1024];
+
+        ConnectionInfo(int domain, int type,int buffSize);
         int getSocket();
         std::string getIPAddress();
         int getPort();
@@ -76,22 +81,24 @@
 
     //subclass for TCP server
     class TCPServer:public Server{
+    private:
+        void serveRequest(ConnectionInfo conInfo);
     public:
         TCPServer(int port, int domain, int con_limit);
         virtual int Bind() override;
         virtual int Listen() override;
         virtual void Run() override;
-        void serveRequest(struct clientInfo client);
     };
 
     //subclass for UDP server
     class UDPServer:public Server{
+    private:
+        void serveRequest(ConnectionInfo conInfo);
     public:
         UDPServer(int port, int domain, int con_limit);
         virtual int Bind() override;
         virtual int Listen() override;
         virtual void Run() override;
-        //virtual void serveRequest(struct clientInfo client) override;
     };
 
     //abstarct factory

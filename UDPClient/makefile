@@ -1,20 +1,20 @@
 #######################################################
-# makefile for compiling and running HTTP server program
+# makefile for compiling and running UDPClient program
 # hprakash@iu.edu, hitenderprakash@gmail.com
 #######################################################
 CC=g++ -std=c++11
 OPTS=
 INCS=
-LIBS= -lpthread
+LIBS=
 
 %.o: %.cpp
 	$(CC) $(OPTS) $(INCS) -c $<
 
-server: main.o Server.o TCPServer.o UDPServer.o helperFunctions.o createServerFactory.o ConnectionInfo.o
+UDPClient: UDPClient.o
 	$(CC) $(OPTS) $(INCS) -o $@ $^  $(LIBS)
 
-run: server
-	@./server
+run: UDPClient
+	@./UDPClient
 
 clean:
-	rm -f server *.o
+	rm -f UDPClient *.o

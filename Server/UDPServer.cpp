@@ -23,25 +23,67 @@ int UDPServer::Listen(){
     return 1;
 }
 
-void UDPServer::serveRequest(clientInfo client){
-    
-}
 
 void UDPServer::Run(){
     while(1){
-        struct sockaddr_in client_addr;
-        socklen_t clilen=sizeof(client_addr);
-        int n;
-        char buff[1024];
-        bzero(buff,1024);
-        n=recvfrom(listen_socketfd, buff,sizeof(buff),0,(struct sockaddr *)&client_addr,&clilen);
-        if(n<0){
-            std::cerr<<"\nError: UDP Receive failed";
+        ConnectionInfo conInfo(domain,type,1024);
+        socklen_t clilen=sizeof(conInfo.ClientAddr);
+        bzero(conInfo.buff,conInfo.buffSize);
+
+        //UDP server will not accept but directly receive
+        if((conInfo.numBytes=recvfrom(listen_socketfd, conInfo.buff,sizeof(conInfo.buff),0,(struct sockaddr *)&conInfo.ClientAddr,&clilen))>0){
+            mtx.lock();
+            if(active_connections < connection_limit){
+                std::thread servThread(&UDPServer::serveRequest,this,conInfo);
+                active_connections++;
+                servThread.detach();
+            }
+            else{
+                //std::cout<<"\nConnection Limit over, can't accept new connection";
+                //std::cout<<"\nDropping connection from: ";
+                close(conInfo.socketfd);
+            }
+            mtx.unlock();
         }
-        //char *ipad = gethostbyaddr((const char *)&client_addr.sin_addr.s_addr,sizeof(client_addr.sin_addr.s_addr),domain);
-        std::string ClientIP = std::string(inet_ntoa(client_addr.sin_addr));
-        int clientPort = ntohs(client_addr.sin_port);
-        std::cout<<"\nServing new connection from: "<<ClientIP<<" :"<<clientPort<<"\n";
-        n = sendto(listen_socketfd, buff, n, 0,(struct sockaddr *)&client_addr, clilen);
     }
+    close(listen_socketfd);
+}
+
+//method for serving the request of the client
+//to be executed by a new thread
+void UDPServer::serveRequest(ConnectionInfo conInfo){
+    std::string ClientIP = conInfo.getIPAddress();
+    int clientPort = conInfo.getPort();
+    socklen_t clilen=sizeof(conInfo.ClientAddr);
+    std::cout<<"\nServing new connection from: "<<ClientIP<<" :"<<clientPort<<"\n";
+    std::string msg="";
+    if(conInfo.buff){msg=std::string(conInfo.buff);}
+    std::string fname = msg;
+
+    //since files are kept at different file path depending on their types
+    //create the full file path
+    //currently hard coding all the directory to "Files"
+    std::string absFileName= "./Files/"+fname;
+    //prepare response
+    std::string response = "";
+    string fileBuf="";
+    ifstream resFile;
+    resFile.open(absFileName.c_str());
+    if(resFile){
+        response="\n==================File Content:===================\n";
+        while(!resFile.eof()){
+            std::string temp="";
+            getline(resFile,temp);
+            fileBuf+="\n"+temp;
+        }
+        resFile.close();
+    }
+    else{
+        response="\nRequested File not found!\n";
+    }
+    fileBuf=response+fileBuf;
+    conInfo.numBytes = sendto(listen_socketfd, fileBuf.c_str(), strlen(fileBuf.c_str())-1, 0,(struct sockaddr *)&conInfo.ClientAddr, clilen);
+    mtx.lock();
+    active_connections--;
+    mtx.unlock();
 }
